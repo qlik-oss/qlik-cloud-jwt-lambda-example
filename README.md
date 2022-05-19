@@ -4,4 +4,4 @@ An example web page using JSON web tokens to process authorization to a Qlik Clo
 
 Please refer to the complete tutorial on qlik.dev here _link to come_.
 
-The AWS Lambda functions can be found under **Releases**.
+The AWS Lambda functions can be found under [Releases](https://github.com/qlik-oss/qlik-cloud-jwt-lambda-example/releases).

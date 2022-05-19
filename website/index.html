@@ -19,14 +19,13 @@
         const WEBINTEGRATIONID = '<web-integration-id>';
         const APPID = '<app-id>';
         const SHEETID = '<sheet-id>';
-        const IDENTITY = '<identity>';
 
         //    MAIN
 
         (async function main() {
             const isLoggedIn = await qlikLogin();
             const qcsHeaders = await getQCSHeaders();
-            const [session, enigmaApp] = await connectEnigma(qcsHeaders, APPID, IDENTITY);
+            const [session, enigmaApp] = await connectEnigma(qcsHeaders, APPID);
             handleDisconnect(session);
             const theme = await getTheme(enigmaApp);
             renderSingleIframe('qlik_frame', APPID, SHEETID, theme);
@@ -104,12 +103,12 @@
 
         //    ENIGMA ENGINE CONNECTION
 
-        async function connectEnigma(qcsHeaders, appId, identity) {
-            const [session, app] = await getEnigmaSessionAndApp(qcsHeaders, appId, identity);
+        async function connectEnigma(qcsHeaders, appId) {
+            const [session, app] = await getEnigmaSessionAndApp(qcsHeaders, appId);
             return [session, app];
         }
 
-        async function getEnigmaSessionAndApp(headers, appId, identity) {
+        async function getEnigmaSessionAndApp(headers, appId) {
             const params = Object.keys(headers)
                 .map((key) => `${key}=${headers[key]}`)
                 .join('&');
@@ -118,8 +117,7 @@
                 const schema = await (await fetch('https://unpkg.com/enigma.js@2.7.0/schemas/12.612.0.json')).json();
                 const session = enigma.create({
                     schema,
-                    url: `wss://${TENANT}/app/${appId}?${params}`,
-                    identity: identity
+                    url: `wss://${TENANT}/app/${appId}?${params}`
                 });
                 const enigmaGlobal = await session.open();
                 const enigmaApp = await enigmaGlobal.openDoc(appId);

@@ -115,14 +115,34 @@
 
             return (async () => {
                 const schema = await (await fetch('https://unpkg.com/enigma.js@2.7.0/schemas/12.612.0.json')).json();
-                const session = enigma.create({
-                    schema,
-                    url: `wss://${TENANT}/app/${appId}?${params}`
-                });
-                const enigmaGlobal = await session.open();
-                const enigmaApp = await enigmaGlobal.openDoc(appId);
-                return [session, enigmaApp];
+
+                try {
+                    return await createEnigmaAppSession(schema, appId, params);
+                }
+                catch {
+                    // If the socket is closed immediately following the connection this
+                    // could be due to an edge-case race condition where the newly created
+                    // user does not yet have access to the app due to access control propagation.
+                    // This bit of code will make another attempt after a 1.5 seconds.
+                    const waitSecond = await new Promise(resolve => setTimeout(resolve, 1500));
+                    try {
+                        return await createEnigmaAppSession(schema, appId, params);
+                    }
+                    catch (e) {
+                        throw new Error(e);
+                    }
+                }
             })();
+        }
+
+        async function createEnigmaAppSession(schema, appId, params) {
+            const session = enigma.create({
+                schema,
+                url: `wss://${TENANT}/app/${appId}?${params}`
+            });
+            const enigmaGlobal = await session.open();
+            const enigmaApp = await enigmaGlobal.openDoc(appId);
+            return [session, enigmaApp];
         }
 
         //    BONUS! DYNAMICALLY FETCH THEME

@@ -178,6 +178,10 @@
                 const message = 'Due to loss of connection, this session has been suspended.';
                 console.log(message);
             });
+
+            window.addEventListener('offline', () => {
+                session.close();
+            });
         }
 
         //    HELPER FUNCTION TO GENERATE IFRAME
